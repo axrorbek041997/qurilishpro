@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
+    "start:dev": "tsc -w & nodemon dist/index.js",
     "start": "node dist/index.js",
     "seed": "ts-node -r dotenv/config src/seed.ts"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "argon2": "^0.44.0",
     "bullmq": "^5.51.5",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -21,7 +22,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.0",
     "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
+    "multer": "2.1.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
 import { Router } from 'express'
-import { getExpenses, createExpense, deleteExpense } from '../controllers/expense.controller'
-import { validate } from '../middleware/validate.middleware'
-import { createExpenseSchema, getExpensesSchema } from '../schemas/expense.schema'
+import { getExpenses, createExpense, deleteExpense } from './expense.controller'
+import { validate } from '../../middleware/validate.middleware'
+import { createExpenseSchema, getExpensesSchema } from './expense.schema'
 
 const router = Router()
 

@@ -1,26 +1,25 @@
-import { Request, Response, NextFunction } from 'express'
-import { verifyAccessToken, JwtPayload } from '../utils/jwt'
-import { AppError } from '../utils/AppError'
+import { Request, Response, NextFunction } from 'express';
+import {verifyAccessToken} from "../utils/jwt";
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: JwtPayload
-    }
-  }
-}
-
-export function authenticate(req: Request, _res: Response, next: NextFunction): void {
-  const authHeader = req.headers.authorization
-  if (!authHeader?.startsWith('Bearer ')) {
-    return next(new AppError('No access token provided', 401))
-  }
-
-  const token = authHeader.slice(7)
+export default async function (req: Request, _: Response, next: NextFunction) {
   try {
-    req.user = verifyAccessToken(token)
-    next()
-  } catch {
-    next(new AppError('Invalid or expired access token', 401))
+    const auth = req.headers['authorization'];
+    if (!auth || !auth.startsWith('Bearer '))
+      throw {
+        statusCode: 401,
+        name: 'AuthenticationError',
+        message: 'Unauthorized',
+      };
+
+    const token = auth.split(' ')[1];
+    const decodedPayload = verifyAccessToken(token);
+
+    req.user = decodedPayload as any;
+    req.token = token;
+
+    next();
+  } catch (e: any) {
+    e.statusCode = 401;
+    next(e);
   }
 }

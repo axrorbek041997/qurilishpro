@@ -1,12 +1,11 @@
 import { Request, Response } from 'express'
-import { Expense } from '../models/Expense'
-import { Worker } from '../models/Worker'
-import { Attendance } from '../models/Attendance'
-import { Material } from '../models/Material'
-import { MaterialTransaction } from '../models/MaterialTransaction'
-import { reportQueue } from '../queues/report.queue'
-import { asyncHandler } from '../utils/asyncHandler'
-import { sendSuccess } from '../utils/response'
+import { Expense } from '../../models/Expense'
+import { Worker } from '../../models/Worker'
+import { Attendance } from '../../models/Attendance'
+import { MaterialTransaction } from '../../models/MaterialTransaction'
+import { reportQueue } from './report.queue'
+import { asyncHandler } from '../../utils/asyncHandler'
+import { sendSuccess } from '../../utils/response'
 
 export const getSummary = asyncHandler(async (req: Request, res: Response) => {
   const { projectId, from, to } = req.query as { projectId: string; from: string; to: string }

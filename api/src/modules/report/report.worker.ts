@@ -1,10 +1,10 @@
 import { Worker } from 'bullmq'
-import { redis } from '../config/redis'
-import { Expense } from '../models/Expense'
-import { Worker as WorkerModel } from '../models/Worker'
-import { Attendance } from '../models/Attendance'
-import { Material } from '../models/Material'
-import { MaterialTransaction } from '../models/MaterialTransaction'
+import { redis } from '../../config/redis'
+import { Expense } from '../../models/Expense'
+import { Worker as WorkerModel } from '../../models/Worker'
+import { Attendance } from '../../models/Attendance'
+import { Material } from '../../models/Material'
+import { MaterialTransaction } from '../../models/MaterialTransaction'
 
 interface ExportJobData {
   userId: string
@@ -78,6 +78,9 @@ export const reportWorker = new Worker<ExportJobData, ExportResult>(
         note: t.note ?? '',
       }
     })
+
+    void workerWageMap
+    void workerNameMap
 
     return {
       expenses: expenseRows,

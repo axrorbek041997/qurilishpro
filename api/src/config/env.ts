@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import dotenv from 'dotenv'
+dotenv.config()
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -13,7 +15,7 @@ const envSchema = z.object({
   JWT_REFRESH_EXPIRES: z.string().default('7d'),
 
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
-  UPLOADS_DIR: z.string().default('uploads'),
+  FILES_DIR: z.string().default('uploads'),
 })
 
 const parsed = envSchema.safeParse(process.env)

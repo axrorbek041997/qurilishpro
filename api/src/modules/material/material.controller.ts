@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
-import { Material } from '../models/Material'
-import { MaterialTransaction } from '../models/MaterialTransaction'
-import { AppError } from '../utils/AppError'
-import { asyncHandler } from '../utils/asyncHandler'
-import { sendSuccess } from '../utils/response'
+import { Material } from '../../models/Material'
+import { MaterialTransaction } from '../../models/MaterialTransaction'
+import { AppError } from '../../utils/AppError'
+import { asyncHandler } from '../../utils/asyncHandler'
+import { sendSuccess } from '../../utils/response'
 
 export const getMaterials = asyncHandler(async (req: Request, res: Response) => {
   const { projectId } = req.query as { projectId?: string }

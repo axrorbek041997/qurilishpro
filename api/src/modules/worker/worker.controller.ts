@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
 import { Types } from 'mongoose'
-import { Worker } from '../models/Worker'
-import { Attendance } from '../models/Attendance'
-import { AppError } from '../utils/AppError'
-import { asyncHandler } from '../utils/asyncHandler'
-import { sendSuccess } from '../utils/response'
+import { Worker } from '../../models/Worker'
+import { Attendance } from '../../models/Attendance'
+import { AppError } from '../../utils/AppError'
+import { asyncHandler } from '../../utils/asyncHandler'
+import { sendSuccess } from '../../utils/response'
 
 export const getWorkers = asyncHandler(async (req: Request, res: Response) => {
   const { projectId } = req.query as { projectId?: string }

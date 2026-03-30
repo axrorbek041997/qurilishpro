@@ -1,5 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose'
-import bcrypt from 'bcryptjs'
+import argon2 from 'argon2'
 
 export interface IUser extends Document {
   _id: Types.ObjectId
@@ -23,7 +23,7 @@ const userSchema = new Schema<IUser>(
 )
 
 userSchema.methods.comparePassword = function (plain: string): Promise<boolean> {
-  return bcrypt.compare(plain, this.passwordHash)
+  return argon2.verify(plain, this.passwordHash)
 }
 
 userSchema.set('toJSON', {

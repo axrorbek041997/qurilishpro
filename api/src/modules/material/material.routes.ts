@@ -2,9 +2,9 @@ import { Router } from 'express'
 import {
   getMaterials, createMaterial, updateMaterial, deleteMaterial,
   getTransactions, createTransaction, getMaterialStock,
-} from '../controllers/material.controller'
-import { validate } from '../middleware/validate.middleware'
-import { createMaterialSchema, updateMaterialSchema, createTransactionSchema } from '../schemas/material.schema'
+} from './material.controller'
+import { validate } from '../../middleware/validate.middleware'
+import { createMaterialSchema, updateMaterialSchema, createTransactionSchema } from './material.schema'
 
 const router = Router()
 

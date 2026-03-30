@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { Expense } from '../models/Expense'
-import { AppError } from '../utils/AppError'
-import { asyncHandler } from '../utils/asyncHandler'
-import { sendSuccess } from '../utils/response'
+import { Expense } from '../../models/Expense'
+import { AppError } from '../../utils/AppError'
+import { asyncHandler } from '../../utils/asyncHandler'
+import { sendSuccess } from '../../utils/response'
 
 export const getExpenses = asyncHandler(async (req: Request, res: Response) => {
   const { projectId, from, to } = req.query as { projectId: string; from?: string; to?: string }

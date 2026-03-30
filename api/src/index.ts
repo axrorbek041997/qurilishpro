@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { env } from './config/env'
 import { connectDatabase } from './config/database'
 import app from './app'
-import { reportWorker } from './queues/report.worker'
+import { reportWorker } from './modules/report/report.worker'
 
 async function bootstrap(): Promise<void> {
   await connectDatabase()

@@ -2,12 +2,12 @@ import { Router } from 'express'
 import {
   getWorkers, createWorker, updateWorker, deleteWorker,
   getAttendance, toggleAttendance, bulkAttendance,
-} from '../controllers/worker.controller'
-import { validate } from '../middleware/validate.middleware'
+} from './worker.controller'
+import { validate } from '../../middleware/validate.middleware'
 import {
   createWorkerSchema, updateWorkerSchema,
   toggleAttendanceSchema, bulkAttendanceSchema, getAttendanceSchema,
-} from '../schemas/worker.schema'
+} from './worker.schema'
 
 const router = Router()
 

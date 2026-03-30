@@ -1,16 +1,16 @@
 import { Request, Response } from 'express'
 import path from 'path'
 import fs from 'fs'
-import { Project } from '../models/Project'
-import { Worker } from '../models/Worker'
-import { Attendance } from '../models/Attendance'
-import { Expense } from '../models/Expense'
-import { Material } from '../models/Material'
-import { MaterialTransaction } from '../models/MaterialTransaction'
-import { AppError } from '../utils/AppError'
-import { asyncHandler } from '../utils/asyncHandler'
-import { sendSuccess } from '../utils/response'
-import { env } from '../config/env'
+import { Project } from '../../models/Project'
+import { Worker } from '../../models/Worker'
+import { Attendance } from '../../models/Attendance'
+import { Expense } from '../../models/Expense'
+import { Material } from '../../models/Material'
+import { MaterialTransaction } from '../../models/MaterialTransaction'
+import { AppError } from '../../utils/AppError'
+import { asyncHandler } from '../../utils/asyncHandler'
+import { sendSuccess } from '../../utils/response'
+import { env } from '../../config/env'
 
 export const getProjects = asyncHandler(async (req: Request, res: Response) => {
   const projects = await Project.find({ userId: req.user!.userId }).sort({ createdAt: -1 })
@@ -44,7 +44,7 @@ export const deleteProject = asyncHandler(async (req: Request, res: Response) =>
 
   // Remove uploaded schema files
   for (const schema of project.schemas) {
-    const filePath = path.join(env.UPLOADS_DIR, schema.filePath)
+    const filePath = path.join(env.FILES_DIR, schema.filePath)
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
   }
 
@@ -88,7 +88,7 @@ export const deleteSchema = asyncHandler(async (req: Request, res: Response) => 
   const schema = project.schemas.find((s) => s._id.toString() === req.params.schemaId)
   if (!schema) throw new AppError('Schema not found', 404)
 
-  const filePath = path.join(env.UPLOADS_DIR, schema.filePath)
+  const filePath = path.join(env.FILES_DIR, schema.filePath)
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
 
   project.schemas.pull({ _id: req.params.schemaId })
@@ -103,7 +103,7 @@ export const getSchemaFile = asyncHandler(async (req: Request, res: Response) =>
   const schema = project.schemas.find((s) => s._id.toString() === req.params.schemaId)
   if (!schema) throw new AppError('Schema not found', 404)
 
-  const filePath = path.resolve(env.UPLOADS_DIR, schema.filePath)
+  const filePath = path.resolve(env.FILES_DIR, schema.filePath)
   if (!fs.existsSync(filePath)) throw new AppError('File not found on disk', 404)
 
   res.sendFile(filePath)

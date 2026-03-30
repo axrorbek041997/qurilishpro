@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { getSummary, queueExport, getExportStatus } from '../controllers/report.controller'
+import { getSummary, queueExport, getExportStatus } from './report.controller'
 
 const router = Router()
 
