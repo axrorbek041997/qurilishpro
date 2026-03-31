@@ -4,9 +4,9 @@
  */
 import 'dotenv/config'
 import mongoose from 'mongoose'
-import bcrypt from 'bcryptjs'
 import { env } from './config/env'
 import { User } from './models/User'
+import argon2 from "argon2";
 
 async function seed(): Promise<void> {
   await mongoose.connect(env.MONGODB_URI)
@@ -18,7 +18,7 @@ async function seed(): Promise<void> {
   if (existing) {
     console.log(`User ${email} already exists — skipping`)
   } else {
-    const passwordHash = await bcrypt.hash('admin123', 12)
+    const passwordHash = await argon2.hash('admin123')
     await User.create({ email, passwordHash, name: 'Admin', role: 'admin' })
     console.log(`✅  Created user:`)
     console.log(`    Email:    ${email}`)

@@ -1,5 +1,4 @@
 import { Schema, model, Document, Types } from 'mongoose'
-import argon2 from 'argon2'
 
 export interface IUser extends Document {
   _id: Types.ObjectId
@@ -9,7 +8,6 @@ export interface IUser extends Document {
   role: 'admin' | 'manager' | 'viewer'
   createdAt: Date
   updatedAt: Date
-  comparePassword(plain: string): Promise<boolean>
 }
 
 const userSchema = new Schema<IUser>(
@@ -21,20 +19,5 @@ const userSchema = new Schema<IUser>(
   },
   { timestamps: true },
 )
-
-userSchema.methods.comparePassword = function (plain: string): Promise<boolean> {
-  return argon2.verify(plain, this.passwordHash)
-}
-
-userSchema.set('toJSON', {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  transform: (_doc: any, ret: any) => {
-    ret.id = ret._id
-    delete ret._id
-    delete ret.__v
-    delete ret.passwordHash
-    return ret
-  },
-})
 
 export const User = model<IUser>('User', userSchema)
