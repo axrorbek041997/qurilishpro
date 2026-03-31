@@ -12,14 +12,14 @@ async function seed(): Promise<void> {
   await mongoose.connect(env.MONGODB_URI)
   console.log('Connected to MongoDB')
 
-  const email = 'admin@qurilishpro.uz'
+  const email = env.ADMIN_EMAIL
   const existing = await User.findOne({ email })
 
   if (existing) {
     console.log(`User ${email} already exists — skipping`)
   } else {
-    const passwordHash = await argon2.hash('admin123')
-    await User.create({ email, passwordHash, name: 'Admin', role: 'admin' })
+    const passwordHash = await argon2.hash(env.ADMIN_PASSWORD)
+    await User.create({ email, passwordHash, name: env.ADMIN_NAME, role: 'admin' })
     console.log(`✅  Created user:`)
     console.log(`    Email:    ${email}`)
     console.log(`    Password: admin123`)

@@ -16,6 +16,10 @@ const envSchema = z.object({
 
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
   FILES_DIR: z.string().default('uploads'),
+
+  ADMIN_EMAIL: z.string().default('admin@qurilishpro.uz'),
+  ADMIN_PASSWORD: z.string().default('admin123!'),
+  ADMIN_NAME: z.string().default('Admin'),
 })
 
 const parsed = envSchema.safeParse(process.env)
