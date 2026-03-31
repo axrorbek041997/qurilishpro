@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { api, setAccessToken, clearAccessToken } from '../services/api'
+import { api, setAccessToken, setRefreshToken, getRefreshToken, clearTokens } from '../services/api'
 
 export interface AuthUser {
   id: string
@@ -25,13 +25,21 @@ export const useAuthStore = create<AuthState>((set) => ({
   isInitialized: false,
 
   initialize: async () => {
+    const storedRefresh = getRefreshToken()
+    if (!storedRefresh) {
+      set({ user: null, isInitialized: true })
+      return
+    }
     try {
-      // Try to get a new access token using the httpOnly refresh cookie
-      const { data } = await api.post<{ accessToken: string; user: AuthUser }>('/auth/refresh')
+      const { data } = await api.post<{ accessToken: string; refreshToken: string; user: AuthUser }>(
+        '/auth/refresh',
+        { refreshToken: storedRefresh },
+      )
       setAccessToken(data.accessToken)
+      setRefreshToken(data.refreshToken)
       set({ user: data.user, isInitialized: true })
     } catch {
-      // No valid refresh cookie — user must log in
+      clearTokens()
       set({ user: null, isInitialized: true })
     }
   },
@@ -39,11 +47,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email: string, password: string) => {
     set({ isLoading: true })
     try {
-      const { data } = await api.post<{ accessToken: string; user: AuthUser }>('/auth/login', {
+      const { data } = await api.post<{ accessToken: string; refreshToken: string; user: AuthUser }>('/auth/login', {
         email,
         password,
       })
       setAccessToken(data.accessToken)
+      setRefreshToken(data.refreshToken)
       set({ user: data.user, isLoading: false })
     } catch {
       set({ isLoading: false })
@@ -59,7 +68,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch {
       // best-effort
     } finally {
-      clearAccessToken()
+      clearTokens()
       set({ user: null })
     }
   },
@@ -67,6 +76,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 // Listen for forced logout events (triggered by axios interceptor on refresh fail)
 window.addEventListener('auth:logout', () => {
-  clearAccessToken()
+  clearTokens()
   useAuthStore.setState({ user: null })
 })

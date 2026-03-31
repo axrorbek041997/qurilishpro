@@ -4,7 +4,6 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1'
 
 export const api = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true,   // send httpOnly refresh-token cookie
   timeout: 15_000,
 })
 
@@ -53,18 +52,18 @@ api.interceptors.response.use(
     isRefreshing = true
 
     try {
-      const { data } = await axios.post<{ accessToken: string }>(
+      const { data } = await axios.post<{ accessToken: string; refreshToken: string }>(
         `${BASE_URL}/auth/refresh`,
-        {},
-        { withCredentials: true },
+        { refreshToken: getRefreshToken() },
       )
       setAccessToken(data.accessToken)
+      setRefreshToken(data.refreshToken)
       processQueue(null, data.accessToken)
       original.headers.Authorization = `Bearer ${data.accessToken}`
       return api(original)
     } catch (refreshError) {
       processQueue(refreshError, null)
-      clearAccessToken()
+      clearTokens()
       window.dispatchEvent(new CustomEvent('auth:logout'))
       return Promise.reject(refreshError)
     } finally {
@@ -73,9 +72,22 @@ api.interceptors.response.use(
   },
 )
 
-// ── In-memory token store (never localStorage — XSS safe) ────────────────────
+// ── Token store ───────────────────────────────────────────────────────────────
+const ACCESS_KEY  = 'access_token'
+const REFRESH_KEY = 'refresh_token'
+
 let _accessToken: string | null = null
 
 export function getAccessToken(): string | null  { return _accessToken }
 export function setAccessToken(t: string): void  { _accessToken = t }
-export function clearAccessToken(): void         { _accessToken = null }
+
+export function getRefreshToken(): string | null  { return localStorage.getItem(REFRESH_KEY) }
+export function setRefreshToken(t: string): void  { localStorage.setItem(REFRESH_KEY, t) }
+
+export function clearTokens(): void {
+  _accessToken = null
+  localStorage.removeItem(REFRESH_KEY)
+}
+
+// Keep backward-compat export used in auth store
+export function clearAccessToken(): void { _accessToken = null }

@@ -33,6 +33,7 @@ export async function login(req: Request, res: Response) {
         res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTS)
         res.status(200).json({
             accessToken,
+            refreshToken,
             user: {id: user._id.toString(), email: user.email, name: user.name, role: user.role},
         })
     } catch (e: any) {
@@ -42,7 +43,7 @@ export async function login(req: Request, res: Response) {
 
 export async function refresh(req: Request, res: Response) {
     try {
-        const token = req.cookies?.[REFRESH_COOKIE] as string | undefined
+        const token = (req.body?.refreshToken as string | undefined) ?? (req.cookies?.[REFRESH_COOKIE] as string | undefined)
         if (!token) throw new AppError('No refresh token', 401)
 
         let payload
@@ -62,6 +63,7 @@ export async function refresh(req: Request, res: Response) {
         res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTS)
         res.status(200).json({
             accessToken,
+            refreshToken,
             user: {id: user._id.toString(), email: user.email, name: user.name, role: user.role},
         })
     } catch (e: any) {
