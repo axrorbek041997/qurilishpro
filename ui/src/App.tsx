@@ -11,6 +11,7 @@ import { Expenses } from './pages/Expenses'
 import { Materials } from './pages/Materials'
 import { Reports } from './pages/Reports'
 import { Projects } from './pages/Projects'
+import { Users } from './pages/Users'
 
 const AuthLoader: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -50,6 +51,7 @@ const AppLayout: React.FC = () => {
           <Route path="/expenses"  element={<Expenses />} />
           <Route path="/materials" element={<Materials />} />
           <Route path="/reports"   element={<Reports />} />
+          <Route path="/users"     element={<Users />} />
           <Route path="*"          element={<Navigate to="/" replace />} />
         </Routes>
       </main>

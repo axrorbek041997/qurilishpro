@@ -1,15 +1,26 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useProjectsStore } from '../store/useProjectsStore'
 import { useAppStore } from '../store/useAppStore'
+import { useAuthStore } from '../store/useAuthStore'
+import { ProfileModal } from '../features/users/ProfileModal'
 import clsx from 'clsx'
+import toast from 'react-hot-toast'
 
 export const Sidebar: React.FC = () => {
   const { t } = useTranslation()
   const { getActiveProject } = useProjectsStore()
   const { darkMode, toggleDarkMode, language, setLanguage } = useAppStore()
+  const user = useAuthStore((s) => s.user)
   const project = getActiveProject()
+  const logout = useAuthStore((s) => s.logout)
+  const [profileOpen, setProfileOpen] = useState(false)
+
+  const handleLogout = async () => {
+    await logout()
+    toast.success(t('auth.loggedOut'))
+  }
 
   const navItems = [
     { to: '/',          label: t('nav.dashboard'), icon: <HomeIcon /> },
@@ -18,6 +29,7 @@ export const Sidebar: React.FC = () => {
     { to: '/expenses',  label: t('nav.expenses'),  icon: <ExpensesIcon /> },
     { to: '/materials', label: t('nav.materials'), icon: <MaterialsIcon /> },
     { to: '/reports',   label: t('nav.reports'),   icon: <ReportsIcon /> },
+    ...(user?.role === 'admin' ? [{ to: '/users', label: t('nav.users'), icon: <UsersIcon /> }] : []),
   ]
 
   const statusLabel = project
@@ -77,6 +89,24 @@ export const Sidebar: React.FC = () => {
 
       {/* Footer */}
       <div className="px-3 pb-4 pt-2 border-t border-slate-100 dark:border-slate-800 mt-2 space-y-1">
+        {/* Profile button */}
+        {user && (
+          <button
+            onClick={() => setProfileOpen(true)}
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
+          >
+            <div className="w-7 h-7 rounded-xl bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold flex-shrink-0">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate leading-tight">{user.name}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 truncate leading-tight">{user.email}</p>
+            </div>
+            <svg className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+        )}
         {/* Language switcher */}
         <div className="flex gap-1 px-4 py-2">
           {(['uz', 'en', 'ru'] as const).map((lang) => (
@@ -101,7 +131,16 @@ export const Sidebar: React.FC = () => {
           <span className="text-base">{darkMode ? '☀️' : '🌙'}</span>
           {darkMode ? t('app.lightMode') : t('app.darkMode')}
         </button>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+        >
+          <LogoutIcon />
+          {t('auth.logout')}
+        </button>
       </div>
+
+      <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
     </aside>
   )
 }
@@ -123,4 +162,10 @@ function MaterialsIcon() {
 }
 function ReportsIcon() {
   return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+}
+function UsersIcon() {
+  return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+}
+function LogoutIcon() {
+  return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
 }

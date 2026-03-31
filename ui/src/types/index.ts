@@ -87,6 +87,15 @@ export interface DailyReport {
   totalWages: number
 }
 
+export interface AppUser {
+  id: string
+  email: string
+  name: string
+  role: 'admin' | 'manager' | 'viewer'
+  createdAt: string
+  updatedAt: string
+}
+
 export const EXPENSE_CATEGORIES: Record<ExpenseCategory, { label: string; color: string; icon: string }> = {
   materials: { label: 'Materials', color: 'bg-blue-100 text-blue-700', icon: '🧱' },
   labor:     { label: 'Labor',     color: 'bg-purple-100 text-purple-700', icon: '👷' },

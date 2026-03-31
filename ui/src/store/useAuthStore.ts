@@ -16,6 +16,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   initialize: () => Promise<void>
+  updateCurrentUser: (updates: Partial<AuthUser>) => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -49,6 +50,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw new Error('Invalid email or password')
     }
   },
+
+  updateCurrentUser: (updates) => set((s) => ({ user: s.user ? { ...s.user, ...updates } : null })),
 
   logout: async () => {
     try {

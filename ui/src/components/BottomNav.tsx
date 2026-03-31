@@ -1,10 +1,16 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useAuthStore } from '../store/useAuthStore'
+import { ProfileModal } from '../features/users/ProfileModal'
 import clsx from 'clsx'
 
 export const BottomNav: React.FC = () => {
   const { t } = useTranslation()
+  const user = useAuthStore((s) => s.user)
+  const [profileOpen, setProfileOpen] = useState(false)
+
+  const isAdmin = user?.role === 'admin'
 
   const navItems = [
     { to: '/',          label: t('nav.dashboard'), icon: <HomeIcon /> },
@@ -16,32 +22,68 @@ export const BottomNav: React.FC = () => {
   ]
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 z-40 safe-bottom">
-      <div className="flex items-stretch">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) =>
-              clsx(
-                'flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors',
-                isActive
-                  ? 'text-primary-500'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <span className={clsx('transition-transform', isActive && 'scale-110')}>{item.icon}</span>
-                <span className="text-[10px] font-medium leading-none">{item.label}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
-      </div>
-    </nav>
+    <>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 z-40 safe-bottom">
+        <div className="flex items-stretch">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) =>
+                clsx(
+                  'flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors',
+                  isActive
+                    ? 'text-primary-500'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span className={clsx('transition-transform', isActive && 'scale-110')}>{item.icon}</span>
+                  <span className="text-[10px] font-medium leading-none">{item.label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+
+          {/* Admin: Users link | All users: Profile button */}
+          {isAdmin ? (
+            <NavLink
+              to="/users"
+              className={({ isActive }) =>
+                clsx(
+                  'flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors',
+                  isActive
+                    ? 'text-primary-500'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span className={clsx('transition-transform', isActive && 'scale-110')}><UsersIcon /></span>
+                  <span className="text-[10px] font-medium leading-none">{t('nav.users')}</span>
+                </>
+              )}
+            </NavLink>
+          ) : (
+            <button
+              onClick={() => setProfileOpen(true)}
+              className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            >
+              <div className="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-[10px] font-bold">
+                {user?.name?.charAt(0)?.toUpperCase() ?? '?'}
+              </div>
+              <span className="text-[10px] font-medium leading-none">{t('users.profile')}</span>
+            </button>
+          )}
+        </div>
+      </nav>
+
+      <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
+    </>
   )
 }
 
@@ -51,3 +93,4 @@ function WorkersIcon()   { return <svg className="w-5 h-5" fill="none" viewBox="
 function ExpensesIcon()  { return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg> }
 function MaterialsIcon() { return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg> }
 function ReportsIcon()   { return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> }
+function UsersIcon()     { return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg> }
