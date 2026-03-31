@@ -96,7 +96,7 @@ export const Sidebar: React.FC = () => {
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
           >
             <div className="w-7 h-7 rounded-xl bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold flex-shrink-0">
-              {user.name.charAt(0).toUpperCase()}
+              {user.name?.[0]?.toUpperCase() ?? '?'}
             </div>
             <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate leading-tight">{user.name}</p>

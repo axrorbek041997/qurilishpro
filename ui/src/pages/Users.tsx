@@ -109,7 +109,7 @@ export const Users: React.FC = () => {
             >
               {/* Avatar */}
               <div className={clsx('w-10 h-10 rounded-2xl flex items-center justify-center text-base font-bold flex-shrink-0', ROLE_BG[user.role])}>
-                {user.name.charAt(0).toUpperCase()}
+                {user.name?.[0]?.toUpperCase() ?? '?'}
               </div>
 
               {/* Info */}

@@ -1,17 +1,8 @@
 import argon2 from 'argon2'
-import {CookieOptions, Request, Response} from 'express'
+import {Request, Response} from 'express'
 import {IUser, User} from '../../models/User'
 import {signAccessToken, signRefreshToken, verifyRefreshToken} from '../../utils/jwt'
 import {AppError} from '../../utils/AppError'
-import {env} from '../../config/env'
-
-const REFRESH_COOKIE = 'refreshToken'
-const COOKIE_OPTS: CookieOptions = {
-    httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: 'strict' as const,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-}
 
 function buildTokenPayload(user: { _id: { toString(): string }, email: string, role: string }) {
     return {userId: user._id.toString(), email: user.email, role: user.role}
@@ -30,7 +21,6 @@ export async function login(req: Request, res: Response) {
         const accessToken = signAccessToken(payload)
         const refreshToken = signRefreshToken(payload)
 
-        res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTS)
         res.status(200).json({
             accessToken,
             refreshToken,
@@ -43,7 +33,7 @@ export async function login(req: Request, res: Response) {
 
 export async function refresh(req: Request, res: Response) {
     try {
-        const token = (req.body?.refreshToken as string | undefined) ?? (req.cookies?.[REFRESH_COOKIE] as string | undefined)
+        const token = req.body?.refreshToken as string | undefined
         if (!token) throw new AppError('No refresh token', 401)
 
         let payload
@@ -60,7 +50,6 @@ export async function refresh(req: Request, res: Response) {
         const accessToken = signAccessToken(newPayload)
         const refreshToken = signRefreshToken(newPayload)
 
-        res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTS)
         res.status(200).json({
             accessToken,
             refreshToken,
@@ -72,6 +61,5 @@ export async function refresh(req: Request, res: Response) {
 }
 
 export async function logout(_req: Request, res: Response) {
-    res.clearCookie(REFRESH_COOKIE, {httpOnly: true, secure: env.NODE_ENV === 'production', sameSite: 'strict'})
     res.status(200).json({success: true, message: 'Logged out'})
 }
