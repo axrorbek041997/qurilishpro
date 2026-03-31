@@ -41,28 +41,32 @@ export async function login(req: Request, res: Response) {
 }
 
 export async function refresh(req: Request, res: Response) {
-    const token = req.cookies?.[REFRESH_COOKIE] as string | undefined
-    if (!token) throw new AppError('No refresh token', 401)
-
-    let payload
     try {
-        payload = verifyRefreshToken(token)
-    } catch {
-        throw new AppError('Invalid or expired refresh token', 401)
+        const token = req.cookies?.[REFRESH_COOKIE] as string | undefined
+        if (!token) throw new AppError('No refresh token', 401)
+
+        let payload
+        try {
+            payload = verifyRefreshToken(token)
+        } catch {
+            throw new AppError('Invalid or expired refresh token', 401)
+        }
+
+        const user = await User.findById(payload.userId, {}, {lean: true}) as unknown as IUser
+        if (!user) throw new AppError('User not found', 401)
+
+        const newPayload = buildTokenPayload(user)
+        const accessToken = signAccessToken(newPayload)
+        const refreshToken = signRefreshToken(newPayload)
+
+        res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTS)
+        res.status(200).json({
+            accessToken,
+            user: {id: user._id.toString(), email: user.email, name: user.name, role: user.role},
+        })
+    } catch (e: any) {
+        res.status(e.statusCode || 500).json({error: {message: e.message, name: 'InternalError'}})
     }
-
-    const user = await User.findById(payload.userId, {}, {lean: true}) as unknown as IUser
-    if (!user) throw new AppError('User not found', 401)
-
-    const newPayload = buildTokenPayload(user)
-    const accessToken = signAccessToken(newPayload)
-    const refreshToken = signRefreshToken(newPayload)
-
-    res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTS)
-    res.status(200).json({
-        accessToken,
-        user: {id: user._id.toString(), email: user.email, name: user.name, role: user.role},
-    })
 }
 
 export async function logout(_req: Request, res: Response) {
