@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '../../components/Modal'
 import { Button } from '../../components/Button'
@@ -27,10 +27,17 @@ export const AddTransactionModal: React.FC<Props> = ({ open, onClose, preselecte
 
   const selectedMaterial = materials.find((m) => m.id === materialId)
 
+  // Sync materialId when materials load after modal mounts
+  useEffect(() => {
+    if (!materialId && materials.length > 0) {
+      setMaterialId(preselectedMaterialId ?? materials[0].id)
+    }
+  }, [materials])
+
   const handleSubmit = async () => {
-    const qty = Number(quantity)
-    if (!qty || qty <= 0) { setError(t('common.required')); return }
-    if (!materialId) { setError(t('common.required')); return }
+    const qty = parseFloat(quantity.replace(',', '.'))
+    if (!quantity.trim() || isNaN(qty) || qty <= 0) { setError(t('common.required')); return }
+    if (!materialId) { toast.error(t('materials.form.noMaterialsForProject')); return }
     try {
       await addTransaction({ materialId, type, quantity: qty, note: note.trim() || undefined, date: format(new Date(), 'yyyy-MM-dd'), projectId })
       toast.success(type === 'in' ? t('materials.stockAdded') : t('materials.stockRemoved'))
@@ -60,7 +67,7 @@ export const AddTransactionModal: React.FC<Props> = ({ open, onClose, preselecte
         ) : (
           <Select label={t('materials.form.selectMaterial')} value={materialId} onChange={(e) => setMaterialId(e.target.value)} options={materials.map((m) => ({ value: m.id, label: `${m.name} (${m.unit})` }))} />
         )}
-        <Input label={`${t('materials.form.quantity')}${selectedMaterial ? ` (${selectedMaterial.unit})` : ''}`} placeholder="e.g. 50" value={quantity} onChange={(e) => { setQuantity(e.target.value); setError('') }} error={error} inputMode="decimal" type="number" min="0" />
+        <Input label={`${t('materials.form.quantity')}${selectedMaterial ? ` (${selectedMaterial.unit})` : ''}`} placeholder="e.g. 50" value={quantity} onChange={(e) => { setQuantity(e.target.value); setError('') }} error={error} inputMode="decimal" />
         <Textarea label={t('materials.form.note')} placeholder={t('materials.form.notePlaceholder')} value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
         <div className="flex gap-3 pt-1">
           <Button variant="secondary" fullWidth onClick={handleClose}>{t('common.cancel')}</Button>
