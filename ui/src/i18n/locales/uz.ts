@@ -136,6 +136,7 @@ const uz = {
       note: 'Izoh (ixtiyoriy)',
       notePlaceholder: 'Bu xarajat nima uchun?',
       selectMaterial: 'Material tanlash',
+      selectWorker: 'Ishchi tanlash',
       attachPhoto: 'Rasm biriktirish uchun bosing',
       uiOnly: '(faqat UI)',
     },
