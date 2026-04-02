@@ -135,6 +135,7 @@ const en = {
       amountPlaceholder: '0',
       note: 'Note (optional)',
       notePlaceholder: 'What is this expense for?',
+      selectMaterial: 'Select Material',
       attachPhoto: 'Tap to attach photo',
       uiOnly: '(UI only)',
     },

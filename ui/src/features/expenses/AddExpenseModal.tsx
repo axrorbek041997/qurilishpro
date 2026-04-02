@@ -5,6 +5,7 @@ import { Button } from '../../components/Button'
 import { Input, Textarea } from '../../components/Input'
 import { useExpensesStore } from '../../store/useExpensesStore'
 import { useProjectsStore } from '../../store/useProjectsStore'
+import { useMaterialsStore } from '../../store/useMaterialsStore'
 import { ExpenseCategory, EXPENSE_CATEGORIES } from '../../types'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
@@ -18,15 +19,31 @@ export const AddExpenseModal: React.FC<Props> = ({ open, onClose }) => {
   const { t } = useTranslation()
   const addExpense = useExpensesStore((s) => s.addExpense)
   const { getActiveProject } = useProjectsStore()
+  const getMaterialsForProject = useMaterialsStore((s) => s.getMaterialsForProject)
+
+  const projectId = getActiveProject()?.id ?? ''
+  const materials = getMaterialsForProject(projectId)
+
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState<ExpenseCategory>('materials')
   const [note, setNote] = useState('')
+  const [selectedMaterialId, setSelectedMaterialId] = useState('')
   const [error, setError] = useState('')
+
+  const handleCategoryChange = (key: ExpenseCategory) => {
+    setCategory(key)
+    if (key !== 'materials') setSelectedMaterialId('')
+  }
+
+  const handleMaterialSelect = (id: string) => {
+    const mat = materials.find((m) => m.id === id)
+    setSelectedMaterialId(id)
+    if (mat) setNote(mat.name)
+  }
 
   const handleSubmit = async () => {
     const amt = Number(amount.replace(/\s/g, ''))
     if (!amt || amt <= 0) { setError(t('common.required')); return }
-    const projectId = getActiveProject()?.id ?? ''
     try {
       await addExpense({ amount: amt, category, note: note.trim() || undefined, date: format(new Date(), 'yyyy-MM-dd'), projectId })
       toast.success(t('expenses.expenseAdded'))
@@ -37,7 +54,7 @@ export const AddExpenseModal: React.FC<Props> = ({ open, onClose }) => {
   }
 
   const handleClose = () => {
-    setAmount(''); setNote(''); setCategory('materials'); setError(''); onClose()
+    setAmount(''); setNote(''); setCategory('materials'); setSelectedMaterialId(''); setError(''); onClose()
   }
 
   const fmt = (val: string) => val.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
@@ -49,12 +66,35 @@ export const AddExpenseModal: React.FC<Props> = ({ open, onClose }) => {
           <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">{t('expenses.form.category')}</p>
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
             {(Object.entries(EXPENSE_CATEGORIES) as [ExpenseCategory, typeof EXPENSE_CATEGORIES[ExpenseCategory]][]).map(([key, val]) => (
-              <button key={key} onClick={() => setCategory(key)} className={clsx('flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition-all text-xs font-semibold gap-1', category === key ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400')}>
+              <button key={key} onClick={() => handleCategoryChange(key)} className={clsx('flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition-all text-xs font-semibold gap-1', category === key ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400')}>
                 <span className="text-lg">{val.icon}</span>{t(`expenses.categories.${key}`)}
               </button>
             ))}
           </div>
         </div>
+
+        {category === 'materials' && materials.length > 0 && (
+          <div>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{t('expenses.form.selectMaterial')}</p>
+            <div className="flex flex-wrap gap-2">
+              {materials.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => handleMaterialSelect(m.id)}
+                  className={clsx(
+                    'px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border',
+                    selectedMaterialId === m.id
+                      ? 'bg-primary-500 text-white border-primary-500'
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-transparent hover:bg-slate-200 dark:hover:bg-slate-600',
+                  )}
+                >
+                  {m.name} <span className="opacity-60">({m.unit})</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <Input label={t('expenses.form.amount')} placeholder={t('expenses.form.amountPlaceholder')} value={amount} onChange={(e) => { setAmount(fmt(e.target.value)); setError('') }} error={error} inputMode="numeric" />
         <div className="flex flex-wrap gap-2">
           {QUICK_AMOUNTS.map((q) => (

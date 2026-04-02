@@ -135,6 +135,7 @@ const ru = {
       amountPlaceholder: '0',
       note: 'Примечание (необязательно)',
       notePlaceholder: 'На что этот расход?',
+      selectMaterial: 'Выбрать материал',
       attachPhoto: 'Нажмите, чтобы прикрепить фото',
       uiOnly: '(только UI)',
     },
