@@ -26,19 +26,19 @@ jobs:
             ui/yarn.lock
 
       - name: Install api dependencies
-        run: yarn ci
+        run: yarn install --frozen-lockfile
         working-directory: api
 
       - name: Install ui dependencies
-        run: yarn ci
+        run: yarn install --frozen-lockfile
         working-directory: ui
 
       - name: Build api
-        run: yarn run build
+        run: yarn build
         working-directory: api
 
       - name: Build ui
-        run: npm yarn build
+        run: yarn build
         working-directory: ui
 
       - name: Deploy
