@@ -1,15 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import {verifyAccessToken} from "../utils/jwt";
+import { verifyAccessToken } from '../utils/jwt';
+import { AppError } from '../utils/AppError';
 
-export default async function (req: Request, _: Response, next: NextFunction) {
+export default function (req: Request, _: Response, next: NextFunction) {
   try {
     const auth = req.headers['authorization'];
-    if (!auth || !auth.startsWith('Bearer '))
-      throw {
-        statusCode: 401,
-        name: 'AuthenticationError',
-        message: 'Unauthorized',
-      };
+    if (!auth || !auth.startsWith('Bearer ')) {
+      return next(new AppError('Unauthorized', 401));
+    }
 
     const token = auth.split(' ')[1];
     const decodedPayload = verifyAccessToken(token);
@@ -18,8 +16,7 @@ export default async function (req: Request, _: Response, next: NextFunction) {
     req.token = token;
 
     next();
-  } catch (e: any) {
-    e.statusCode = 401;
-    next(e);
+  } catch {
+    next(new AppError('Unauthorized', 401));
   }
 }
