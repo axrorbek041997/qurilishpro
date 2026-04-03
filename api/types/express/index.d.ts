@@ -12,6 +12,7 @@ declare namespace Express {
       filename: string
       size: number
       mimetype: string
+      path: string
     }
   }
 }

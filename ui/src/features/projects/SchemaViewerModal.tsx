@@ -29,7 +29,7 @@ export const SchemaViewerModal: React.FC<Props> = ({
   open, onClose, projectId, projectName,
 }) => {
   const { t } = useTranslation()
-  const { addSchema, removeSchema, getProject, fetchSchemaContent } = useProjectsStore()
+  const { addSchema, addRar, removeSchema, getProject, fetchSchemaContent } = useProjectsStore()
   const { darkMode } = useAppStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -58,19 +58,22 @@ export const SchemaViewerModal: React.FC<Props> = ({
     (files: FileList | null) => {
       if (!files || files.length === 0) return
       const file = files[0]
+      const isRar = file.name.toLowerCase().endsWith('.rar')
+      const maxSize = isRar ? 100 * 1024 * 1024 : MAX_FILE_SIZE
 
-      if (file.size > MAX_FILE_SIZE) {
-        toast.error(t('schemas.fileTooLarge', { size: formatBytes(MAX_FILE_SIZE) }))
+      if (file.size > maxSize) {
+        toast.error(t('schemas.fileTooLarge', { size: formatBytes(maxSize) }))
         return
       }
 
       setUploading(true)
-      addSchema(projectId, file)
+      const upload = isRar ? addRar(projectId, file) : addSchema(projectId, file)
+      upload
         .then(() => toast.success(t('schemas.uploadSuccess', { name: file.name })))
         .catch(() => toast.error(t('schemas.uploadFailed')))
         .finally(() => setUploading(false))
     },
-    [projectId, addSchema, t],
+    [projectId, addSchema, addRar, t],
   )
 
   const handleDrop = useCallback(
@@ -154,16 +157,33 @@ export const SchemaViewerModal: React.FC<Props> = ({
       )
     }
 
-    // image
+    if (activeSchema.fileType === 'image') {
+      return (
+        <div className="flex-1 min-h-0 overflow-auto p-4 flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+          <img src={activeContent} alt={activeSchema.name} className="max-w-full max-h-full object-contain rounded-xl shadow-card" draggable={false} />
+        </div>
+      )
+    }
+
+    // dwg, xls, doc, other — download link
     return (
-      <div className="flex-1 min-h-0 overflow-auto p-4 flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <img src={activeContent} alt={activeSchema.name} className="max-w-full max-h-full object-contain rounded-xl shadow-card" draggable={false} />
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-4 p-8">
+        <span className="text-6xl">{fileTypeIcon(activeSchema.fileType)}</span>
+        <p className="font-semibold text-slate-700 dark:text-slate-300 text-center">{activeSchema.name}</p>
+        <p className="text-sm text-slate-400">{formatBytes(activeSchema.size)}</p>
+        <a
+          href={activeContent}
+          download={activeSchema.name}
+          className="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold text-sm transition-colors"
+        >
+          ⬇ {t('common.export')}
+        </a>
       </div>
     )
   }
 
   const fileTypeIcon = (ft: SchemaFileType) =>
-    ({ dxf: '📐', pdf: '📄', image: '🖼️', svg: '✏️' }[ft])
+    ({ dxf: '📐', pdf: '📄', image: '🖼️', svg: '✏️', dwg: '📐', xls: '📊', doc: '📝', other: '📎' }[ft])
 
   return (
     <Transition appear show={open} as={Fragment}>
@@ -208,7 +228,7 @@ export const SchemaViewerModal: React.FC<Props> = ({
                     ref={fileInputRef}
                     type="file"
                     className="hidden"
-                    accept=".dxf,.pdf,.png,.jpg,.jpeg,.svg,.webp"
+                    accept=".dxf,.pdf,.png,.jpg,.jpeg,.svg,.webp,.dwg,.xls,.xlsx,.doc,.docx,.rar"
                     onChange={(e) => handleFileSelect(e.target.files)}
                   />
                 </label>

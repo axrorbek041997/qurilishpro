@@ -27,7 +27,7 @@ export interface IProject extends Document {
 const projectSchemaSchema = new Schema<IProjectSchema>(
   {
     name: { type: String, required: true },
-    fileType: { type: String, enum: ['dxf', 'pdf', 'image', 'svg'], required: true },
+    fileType: { type: String, enum: ['dxf', 'pdf', 'image', 'svg', 'dwg', 'xls', 'doc', 'other'], required: true },
     size: { type: Number, required: true },
     filePath: { type: String, required: true },
     uploadedAt: { type: Date, default: Date.now },

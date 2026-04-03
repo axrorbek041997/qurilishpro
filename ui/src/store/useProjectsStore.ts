@@ -30,6 +30,7 @@ interface ProjectsState {
   setActiveProject: (id: string) => void
 
   addSchema: (projectId: string, file: File) => Promise<void>
+  addRar: (projectId: string, file: File) => Promise<void>
   removeSchema: (projectId: string, schemaId: string) => Promise<void>
   fetchSchemaContent: (projectId: string, schema: ProjectSchema) => Promise<string>
 
@@ -136,6 +137,18 @@ export const useProjectsStore = create<ProjectsState>()(
         }))
       },
 
+      addRar: async (projectId, file) => {
+        const formData = new FormData()
+        formData.append('file', file)
+        const { data: res } = await api.post<{ data: Project }>(`/projects/${projectId}/schemas/rar`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        const updated = mapProject(res.data)
+        set((s) => ({
+          projects: s.projects.map((p) => (p.id === projectId ? updated : p)),
+        }))
+      },
+
       removeSchema: async (projectId, schemaId) => {
         removeSchemaContent(schemaId)
         // Optimistic
@@ -158,7 +171,6 @@ export const useProjectsStore = create<ProjectsState>()(
         if (cached) return cached
 
         const isText = schema.fileType === 'dxf' || schema.fileType === 'svg'
-        const url = `${api.defaults.baseURL}/projects/${projectId}/schemas/${schema.id}/file`
 
         if (isText) {
           const { data } = await api.get<string>(`/projects/${projectId}/schemas/${schema.id}/file`, {
@@ -167,9 +179,13 @@ export const useProjectsStore = create<ProjectsState>()(
           setSchemaContent(schema.id, data)
           return data
         } else {
-          // For PDF/images: return the direct URL (browser handles it)
-          setSchemaContent(schema.id, url)
-          return url
+          // Fetch as blob via authenticated API so the browser can render/download it
+          const { data } = await api.get(`/projects/${projectId}/schemas/${schema.id}/file`, {
+            responseType: 'blob',
+          })
+          const blobUrl = URL.createObjectURL(data)
+          setSchemaContent(schema.id, blobUrl)
+          return blobUrl
         }
       },
 

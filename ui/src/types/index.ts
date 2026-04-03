@@ -54,7 +54,7 @@ export interface MaterialTransaction {
   projectId: string
 }
 
-export type SchemaFileType = 'dxf' | 'pdf' | 'image' | 'svg'
+export type SchemaFileType = 'dxf' | 'pdf' | 'image' | 'svg' | 'dwg' | 'xls' | 'doc' | 'other'
 
 export interface ProjectSchema {
   id: string
